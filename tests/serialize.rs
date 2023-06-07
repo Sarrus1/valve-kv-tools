@@ -1,77 +1,77 @@
-use valve_kv_tools::{parse_keyvalue, KeyValue, Value};
+use valve_kv_tools::{serialize, KeyValue, Value};
 
 #[test]
-fn single_key_value() {
+fn serialize_value() {
     let input = r#""key" "value""#;
-    let kv = parse_keyvalue(input).unwrap();
+    let kv = serialize(input).unwrap();
     assert_eq!(kv.key, "key");
     assert_eq!(kv.value, Value::String("value".to_string()));
 }
 
 #[test]
-fn single_key_value_suffix_whitespace() {
+fn serialize_value_suffix_whitespace() {
     let input = r#""key" "value"
     "#;
-    let kv = parse_keyvalue(input).unwrap();
+    let kv = serialize(input).unwrap();
     assert_eq!(kv.key, "key");
     assert_eq!(kv.value, Value::String("value".to_string()));
 }
 
 #[test]
-fn single_key_value_prefix_whitespace() {
+fn serialize_value_prefix_whitespace() {
     let input = r#"
     "key" "value""#;
-    let kv = parse_keyvalue(input).unwrap();
+    let kv = serialize(input).unwrap();
     assert_eq!(kv.key, "key");
     assert_eq!(kv.value, Value::String("value".to_string()));
 }
 
 #[test]
-fn single_key_value_multiple_lines() {
+fn serialize_value_multiple_lines() {
     let input = r#""key"
     "value""#;
-    let kv = parse_keyvalue(input).unwrap();
+    let kv = serialize(input).unwrap();
     assert_eq!(kv.key, "key");
     assert_eq!(kv.value, Value::String("value".to_string()));
 }
 
 #[test]
-fn single_key_value_prefix_block_comment() {
+fn serialize_value_prefix_block_comment() {
     let input = r#"/* comment */ "key"
     "value""#;
-    let kv = parse_keyvalue(input).unwrap();
+    let kv = serialize(input).unwrap();
     assert_eq!(kv.key, "key");
     assert_eq!(kv.value, Value::String("value".to_string()));
 }
 
 #[test]
-fn single_key_value_middle_block_comment() {
+fn serialize_value_middle_block_comment() {
     let input = r#""key" /* comment */ "value""#;
-    let kv = parse_keyvalue(input).unwrap();
+    let kv = serialize(input).unwrap();
     assert_eq!(kv.key, "key");
     assert_eq!(kv.value, Value::String("value".to_string()));
 }
 
 #[test]
-fn single_key_value_suffix_block_comment() {
+fn serialize_value_suffix_block_comment() {
     let input = r#""key" "value" /* comment */"#;
-    let kv = parse_keyvalue(input).unwrap();
+    let kv = serialize(input).unwrap();
     assert_eq!(kv.key, "key");
     assert_eq!(kv.value, Value::String("value".to_string()));
 }
 
 #[test]
-fn single_key_value_suffix_line_comment() {
+fn serialize_value_suffix_line_comment() {
     let input = r#""key" "value" // comment"#;
-    let kv = parse_keyvalue(input).unwrap();
+    let kv = serialize(input).unwrap();
     assert_eq!(kv.key, "key");
     assert_eq!(kv.value, Value::String("value".to_string()));
 }
 
 #[test]
-fn single_key_section() {
+fn serialize_section() {
     let input = r#""key1" {"key2" "value"}"#;
-    let kv = parse_keyvalue(input).unwrap();
+    let kv = serialize(input).unwrap();
     assert_eq!(kv.key, "key1");
     assert_eq!(
         kv.value,
@@ -83,12 +83,12 @@ fn single_key_section() {
 }
 
 #[test]
-fn single_key_section_multiple_lines() {
+fn serialize_section_multiple_lines() {
     let input = r#""key1"
   {
     "key2" "value"
   }"#;
-    let kv = parse_keyvalue(input).unwrap();
+    let kv = serialize(input).unwrap();
     assert_eq!(kv.key, "key1");
     assert_eq!(
         kv.value,
@@ -100,12 +100,12 @@ fn single_key_section_multiple_lines() {
 }
 
 #[test]
-fn single_key_section_block_comment_1() {
+fn serialize_section_block_comment_1() {
     let input = r#"/* comment */ "key1"
   {
     "key2" "value"
   }"#;
-    let kv = parse_keyvalue(input).unwrap();
+    let kv = serialize(input).unwrap();
     assert_eq!(kv.key, "key1");
     assert_eq!(
         kv.value,
@@ -117,12 +117,12 @@ fn single_key_section_block_comment_1() {
 }
 
 #[test]
-fn single_key_section_block_comment_2() {
+fn serialize_section_block_comment_2() {
     let input = r#""key1" /* comment */
   {
     "key2" "value"
   }"#;
-    let kv = parse_keyvalue(input).unwrap();
+    let kv = serialize(input).unwrap();
     assert_eq!(kv.key, "key1");
     assert_eq!(
         kv.value,
@@ -134,12 +134,12 @@ fn single_key_section_block_comment_2() {
 }
 
 #[test]
-fn single_key_section_block_comment_3() {
+fn serialize_section_block_comment_3() {
     let input = r#""key1"
   { /* comment */
     "key2" "value"
   }"#;
-    let kv = parse_keyvalue(input).unwrap();
+    let kv = serialize(input).unwrap();
     assert_eq!(kv.key, "key1");
     assert_eq!(
         kv.value,
@@ -151,12 +151,12 @@ fn single_key_section_block_comment_3() {
 }
 
 #[test]
-fn single_key_section_block_comment_4() {
+fn serialize_section_block_comment_4() {
     let input = r#""key1"
   {
     /* comment */ "key2" "value"
   }"#;
-    let kv = parse_keyvalue(input).unwrap();
+    let kv = serialize(input).unwrap();
     assert_eq!(kv.key, "key1");
     assert_eq!(
         kv.value,
@@ -168,12 +168,12 @@ fn single_key_section_block_comment_4() {
 }
 
 #[test]
-fn single_key_section_block_comment_5() {
+fn serialize_section_block_comment_5() {
     let input = r#""key1"
   {
    "key2" "value"
   /* comment */}"#;
-    let kv = parse_keyvalue(input).unwrap();
+    let kv = serialize(input).unwrap();
     assert_eq!(kv.key, "key1");
     assert_eq!(
         kv.value,
@@ -185,12 +185,12 @@ fn single_key_section_block_comment_5() {
 }
 
 #[test]
-fn single_key_section_block_comment_6() {
+fn serialize_section_block_comment_6() {
     let input = r#""key1"
   {
    "key2" "value"
   } /* comment */"#;
-    let kv = parse_keyvalue(input).unwrap();
+    let kv = serialize(input).unwrap();
     assert_eq!(kv.key, "key1");
     assert_eq!(
         kv.value,
@@ -202,13 +202,13 @@ fn single_key_section_block_comment_6() {
 }
 
 #[test]
-fn single_key_section_multiple_key_values() {
+fn serialize_section_multiple_key_values() {
     let input = r#""key1"
   {
     "key2" "value"
     "key3" "value"
   }"#;
-    let kv = parse_keyvalue(input).unwrap();
+    let kv = serialize(input).unwrap();
     assert_eq!(kv.key, "key1");
     assert_eq!(
         kv.value,
@@ -226,7 +226,7 @@ fn single_key_section_multiple_key_values() {
 }
 
 #[test]
-fn single_key_section_nested() {
+fn serialize_section_nested() {
     let input = r#""key1"
   {
     "key2" "value"
@@ -234,7 +234,7 @@ fn single_key_section_nested() {
       "key4" "value"
     }
   }"#;
-    let kv = parse_keyvalue(input).unwrap();
+    let kv = serialize(input).unwrap();
     assert_eq!(kv.key, "key1");
     assert_eq!(
         kv.value,
@@ -255,7 +255,7 @@ fn single_key_section_nested() {
 }
 
 #[test]
-fn single_key_section_repeated_keys() {
+fn serialize_section_repeated_keys() {
     let input = r#""key"
   {
     "key" "value"
@@ -263,7 +263,7 @@ fn single_key_section_repeated_keys() {
       "key" "value"
     }
   }"#;
-    let kv = parse_keyvalue(input).unwrap();
+    let kv = serialize(input).unwrap();
     assert_eq!(kv.key, "key");
     assert_eq!(
         kv.value,
