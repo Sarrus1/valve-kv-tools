@@ -1,0 +1,14 @@
+[package]
+name = "valve_kv_tools"
+version = "0.1.0"
+edition = "2021"
+description = "Lossless Valve KeyValue parser, serializer and formatter"
+documentation = "https://docs.rs/valve_kv_tools"
+readme = "README.md"
+repository = "https://github.com/Sarrus1/valve-kv-tools"
+license = "MIT"
+include = ["src/**/*", "Cargo.toml"]
+
+[dependencies]
+pest = "2.6.0"
+pest_derive = "2.6.0"

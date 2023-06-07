@@ -1,0 +1,16 @@
+WHITESPACE = _{ " " | "\t" | "\r" | "\n" }
+COMMENT = { line_comment | block_comment }
+line_comment = { "//" ~ (!"\n" ~ ANY)* }
+block_comment = { "/*" ~ (!"*/" ~ ANY)* ~ "*/" }
+keyvalue = { key ~ (value | section) }
+section = { "{" ~ keyvalue* ~ "}" }
+key = { string }
+value = { string }
+string = ${ "\"" ~ inner ~ "\"" }
+inner = @{ char* }
+char = {
+    !("\"" | "\\") ~ ANY
+    | "\\" ~ ("\"" | "\\" | "/" | "b" | "f" | "n" | "r" | "t")
+    | "\\" ~ ("u" ~ ASCII_HEX_DIGIT{4})
+}
+start = { SOI ~ keyvalue ~ EOI }
