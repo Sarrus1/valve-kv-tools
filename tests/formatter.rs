@@ -43,3 +43,10 @@ fn formatter_key_nested() {
     let output = format_keyvalue(input).unwrap();
     assert_eq!(input, output);
 }
+
+#[test]
+fn formatter_key_value_suffix_comment() {
+    let input = r#""key"    "value"  // comment"#;
+    let output = format_keyvalue(input).unwrap();
+    assert_eq!(input, output);
+}
