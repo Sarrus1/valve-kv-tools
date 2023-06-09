@@ -45,8 +45,138 @@ fn formatter_key_nested() {
 }
 
 #[test]
+fn formatter_key_value_prefix_comment() {
+    let input = r#"/* comment */
+"key"    "value""#;
+    let output = format_keyvalue(input).unwrap();
+    assert_eq!(input, output);
+}
+
+#[test]
 fn formatter_key_value_suffix_comment() {
     let input = r#""key"    "value"  // comment"#;
     let output = format_keyvalue(input).unwrap();
     assert_eq!(input, output);
+}
+
+#[test]
+fn formatter_key_value_middle_comment() {
+    let input = r#""key"  /* comment */  "value""#;
+    let output = format_keyvalue(input).unwrap();
+    assert_eq!(input, output);
+}
+
+#[test]
+fn formatter_key_section_prefix_block_comment() {
+    let input = r#"/* comment */
+"key"
+{
+  "key"    "value"
+}"#;
+    let output = format_keyvalue(input).unwrap();
+    assert_eq!(input, output);
+}
+
+#[test]
+fn formatter_key_section_prefix_line_comment() {
+    let input = r#"// comment
+"key"
+{
+  "key"    "value"
+}"#;
+    let output = format_keyvalue(input).unwrap();
+    assert_eq!(input, output);
+}
+
+#[test]
+fn formatter_key_section_middle_block_comment() {
+    let input = r#""key"  /* comment */
+{
+  "key"    "value"
+}"#;
+    let output = format_keyvalue(input).unwrap();
+    assert_eq!(input, output);
+}
+
+#[test]
+fn formatter_key_section_middle_line_comment() {
+    let input = r#""key"  // comment
+{
+  "key"    "value"
+}"#;
+    let output = format_keyvalue(input).unwrap();
+    assert_eq!(input, output);
+}
+
+#[test]
+fn formatter_key_section_middle_suffix_line_comment() {
+    let input = r#""key"
+{
+  // comment
+  "key"    "value"
+}"#;
+    let output = format_keyvalue(input).unwrap();
+    assert_eq!(input, output);
+}
+
+#[test]
+fn formatter_key_section_middle_suffix_block_comment() {
+    let input = r#""key"
+{
+  /* comment */
+  "key"    "value"
+}"#;
+    let output = format_keyvalue(input).unwrap();
+    assert_eq!(input, output);
+}
+
+#[test]
+fn formatter_key_section_key_value_prefix_block_comment() {
+    let input = r#""key"
+{
+  /* comment */  "key"    "value"
+}"#;
+    let output = r#""key"
+{
+  /* comment */
+  "key"    "value"
+}"#;
+    assert_eq!(output, format_keyvalue(input).unwrap());
+}
+
+#[test]
+fn formatter_key_section_key_value_middle_block_comment() {
+    let input = r#""key"
+{
+  "key"  /* comment */  "value"
+}"#;
+    assert_eq!(input, format_keyvalue(input).unwrap());
+}
+
+#[test]
+fn formatter_key_section_end_prefix_line_comment() {
+    let input = r#""key"
+{
+  "key"    "value"  // comment
+}"#;
+    assert_eq!(input, format_keyvalue(input).unwrap());
+}
+
+#[test]
+fn formatter_key_section_end_prefix_block_comment() {
+    let input = r#""key"
+{
+  "key"    "value"  /* comment */
+}"#;
+    assert_eq!(input, format_keyvalue(input).unwrap());
+}
+
+#[test]
+fn formatter_key_section_suffix_block_comment() {
+    let input = r#""key"
+{
+  "key"    "value"
+}
+/* comment */"#;
+    assert_eq!(input, format_keyvalue(input).unwrap());
 }
