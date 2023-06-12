@@ -9,7 +9,15 @@ repository = "https://github.com/Sarrus1/valve-kv-tools"
 license = "MIT"
 include = ["src/**/*", "Cargo.toml"]
 
+[lib]
+crate-type = ["cdylib", "rlib"]
+path = "src/lib.rs"
+
 [dependencies]
 lsp-types = "0.94.0"
 pest = "2.6.0"
 pest_derive = "2.6.0"
+wasm-bindgen = { version = "=0.2.87", features = [
+    "strict-macro",
+    "serde-serialize",
+] }
