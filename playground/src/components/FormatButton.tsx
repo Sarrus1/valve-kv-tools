@@ -32,7 +32,12 @@ export function FormatButton(props: HeaderProps) {
         variant="contained"
         style={{ backgroundColor: "grey", marginLeft: "auto" }}
         onClick={(_) => {
-          props.setCode(format_keyvalue(props.code, props.settings as Config));
+          try {
+            props.setCode(format_keyvalue(props.code, props.settings as Config));
+          }
+          catch{
+            setShowError(true);
+          }
         }}
       >
         Format

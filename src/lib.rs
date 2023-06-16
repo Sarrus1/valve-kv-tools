@@ -1,7 +1,8 @@
 mod formatter;
+mod linter;
 mod serializer;
 
-pub use {self::formatter::*, self::serializer::*};
+pub use {self::formatter::*, self::linter::*, self::serializer::*};
 
 #[cfg(target_arch = "wasm32")]
 #[wasm_bindgen]

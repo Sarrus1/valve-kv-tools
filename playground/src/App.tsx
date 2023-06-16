@@ -14,7 +14,17 @@ function App() {
   const editorRef = useRef(null);
 
   function handleEditorDidMount(editor: any, monaco: any) {
+    const errorMarkers = [
+      {
+        startLineNumber: 1,
+        startColumn: 1,
+        endLineNumber: 1,
+        endColumn: 5,
+        message: 'Syntax error',
+      },
+    ];
     editorRef.current = editor;
+    monaco.editor.setModelMarkers(editor.getModel(), 'error', errorMarkers);
   }
 
   function handleEditorChange(value: string | undefined, event: any) {
