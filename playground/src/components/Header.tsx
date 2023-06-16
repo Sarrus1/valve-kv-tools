@@ -13,7 +13,7 @@ export default function Header(props: HeaderProps) {
           variant="dense"
         >
           <Typography variant="h6" component="div" style={{ flexGrow: 1 }}>
-            SPFormat v{packageJson.version}
+            valve_keyvalue_tools v{packageJson.version}
           </Typography>
           <FormatButton {...props} />
         </Toolbar>

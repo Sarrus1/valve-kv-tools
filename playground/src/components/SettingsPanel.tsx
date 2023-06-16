@@ -35,122 +35,29 @@ function SettingRowBool(props: SettingRowBoolProps) {
   );
 }
 
-function BraceWrappingRow(props: SettingsPanelProps) {
-  return (
-    <div
-      className="grid grid-cols-2 gap-4 mb-1 mt-2"
-      style={{ gridTemplateColumns: "1fr 15rem" }}
-    >
-      <span className="col-span-1 font-roboto font-bold">Brace Wrapping</span>
-      <fieldset>
-        <p className="font-roboto font-bold">Brace Wrapping</p>
-        <SettingRowBool
-          name="Before function braces"
-          onChange={(e) => {
-            const old = props.settings.brace_wrapping_before_function;
-            props.settings.brace_wrapping_before_function = !old;
-          }}
-        />
-        <SettingRowBool
-          name="Before loop braces"
-          onChange={(e) => {
-            const old = props.settings.brace_wrapping_before_loop;
-            props.settings.brace_wrapping_before_loop = !old;
-          }}
-        />
-        <SettingRowBool
-          name="Before condition braces"
-          onChange={(e) => {
-            const old = props.settings.brace_wrapping_before_condition;
-            props.settings.brace_wrapping_before_condition = !old;
-          }}
-        />
-        <SettingRowBool
-          name="Before enum braces"
-          onChange={(e) => {
-            const old = props.settings.brace_wrapping_before_enum;
-            props.settings.brace_wrapping_before_enum = !old;
-          }}
-        />
-        <SettingRowBool
-          name="Before enum struct braces"
-          onChange={(e) => {
-            const old = props.settings.brace_wrapping_before_enum_struct;
-            props.settings.brace_wrapping_before_enum_struct = !old;
-          }}
-        />
-        <SettingRowBool
-          name="Before typeset braces"
-          onChange={(e) => {
-            const old = props.settings.brace_wrapping_before_typeset;
-            props.settings.brace_wrapping_before_typeset = !old;
-          }}
-        />
-        <SettingRowBool
-          name="Before typeset braces"
-          onChange={(e) => {
-            const old = props.settings.brace_wrapping_before_funcenum;
-            props.settings.brace_wrapping_before_funcenum = !old;
-          }}
-        />
-        <SettingRowBool
-          name="Before methodmap braces"
-          onChange={(e) => {
-            const old = props.settings.brace_wrapping_before_methodmap;
-            props.settings.brace_wrapping_before_methodmap = !old;
-          }}
-        />
-        <SettingRowBool
-          name="Before methodmap property braces"
-          onChange={(e) => {
-            const old = props.settings.brace_wrapping_before_methodmap_property;
-            props.settings.brace_wrapping_before_methodmap_property = !old;
-          }}
-        />
-      </fieldset>
-    </div>
-  );
-}
-
 function SettingsPanel(props: SettingsPanelProps) {
   return (
     <div style={{ margin: "1rem" }}>
-      <SettingRowNumeric
-        name="Breaks before function declaration"
+      <SettingRowBool
+        name="Should the formatter use tabs or spaces for indentation."
         onChange={(e) => {
-          props.settings.breaks_before_function_decl = Number(e.target.value);
+          props.settings.use_tabs = Boolean(e.target.value);
         }}
-        defaultValue={2}
       />
       <SettingRowNumeric
-        name="Breaks before function definition"
+        name="Number of tabs or spaces to use per indent level."
         onChange={(e) => {
-          props.settings.breaks_before_function_def = Number(e.target.value);
+          props.settings.indent_size = Number(e.target.value);
         }}
-        defaultValue={2}
+        defaultValue={4}
       />
       <SettingRowNumeric
         name="Breaks before enum"
         onChange={(e) => {
-          props.settings.breaks_before_enum = Number(e.target.value);
+          props.settings.max_empty_lines = Number(e.target.value);
         }}
-        defaultValue={2}
+        defaultValue={1}
       />
-      <SettingRowNumeric
-        name="Breaks before enum struct"
-        onChange={(e) => {
-          props.settings.breaks_before_enum_struct = Number(e.target.value);
-        }}
-        defaultValue={2}
-      />
-      <SettingRowNumeric
-        name="Breaks before methodmap"
-        onChange={(e) => {
-          props.settings.breaks_before_methodmap = Number(e.target.value);
-        }}
-        defaultValue={2}
-      />
-      <BraceWrappingRow {...props} />
     </div>
   );
 }

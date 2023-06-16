@@ -1,6 +1,7 @@
+use super::tokens::{KvToken, TokenKind};
 use crate::FormatterConfig;
 
-use super::tokens::{KvToken, TokenKind};
+use std::cmp::min;
 
 #[derive(Debug, Clone, PartialEq, Eq, Default)]
 pub(super) struct Emitter {
@@ -65,17 +66,23 @@ impl Emitter {
                 }
                 TokenKind::LineComment(prev_token) => {
                     // This should not be possible, but just in case.
-                    if prev_token.range.start.line == token.range.start.line {
+                    let diff = token.range.start.line.abs_diff(prev_token.range.start.line);
+                    if diff == 0 {
                         self.current_line.push_str("  ");
                     } else {
-                        self.push_line();
+                        for _ in 0..min(diff, self.config.max_empty_lines) {
+                            self.push_line();
+                        }
                     }
                 }
                 TokenKind::BlockComment(prev_token) => {
-                    if prev_token.range.start.line == token.range.start.line {
+                    let diff = token.range.start.line.abs_diff(prev_token.range.start.line);
+                    if diff == 0 {
                         self.current_line.push_str("  ");
                     } else {
-                        self.push_line();
+                        for _ in 0..min(diff, self.config.max_empty_lines) {
+                            self.push_line();
+                        }
                     }
                 }
                 _ => (),
@@ -91,27 +98,36 @@ impl Emitter {
                     self.current_line.push_str("  ");
                 }
                 TokenKind::Value(prev_token) => {
-                    if prev_token.range.start.line == token.range.start.line {
+                    let diff = token.range.start.line.abs_diff(prev_token.range.start.line);
+                    if diff == 0 {
                         self.current_line.push_str("  ");
                     } else {
-                        self.push_line();
+                        for _ in 0..min(diff, self.config.max_empty_lines) {
+                            self.push_line();
+                        }
                     }
                 }
                 TokenKind::LBrace | TokenKind::RBrace => {
                     self.push_line();
                 }
                 TokenKind::BlockComment(prev_token) => {
-                    if prev_token.range.start.line == token.range.start.line {
+                    let diff = token.range.start.line.abs_diff(prev_token.range.start.line);
+                    if diff == 0 {
                         self.current_line.push_str("  ");
                     } else {
-                        self.push_line();
+                        for _ in 0..min(diff, self.config.max_empty_lines) {
+                            self.push_line();
+                        }
                     }
                 }
                 TokenKind::LineComment(prev_token) => {
-                    if prev_token.range.start.line == token.range.start.line {
+                    let diff = token.range.start.line.abs_diff(prev_token.range.start.line);
+                    if diff == 0 {
                         self.current_line.push_str("  ");
                     } else {
-                        self.push_line();
+                        for _ in 0..min(diff, self.config.max_empty_lines) {
+                            self.push_line();
+                        }
                     }
                 }
             }
@@ -127,27 +143,36 @@ impl Emitter {
                     self.current_line.push_str("  ");
                 }
                 TokenKind::Value(prev_token) => {
-                    if prev_token.range.start.line == token.range.start.line {
+                    let diff = token.range.start.line.abs_diff(prev_token.range.start.line);
+                    if diff == 0 {
                         self.current_line.push_str("  ");
                     } else {
-                        self.push_line();
+                        for _ in 0..min(diff, self.config.max_empty_lines) {
+                            self.push_line();
+                        }
                     }
                 }
                 TokenKind::LBrace | TokenKind::RBrace => {
                     self.push_line();
                 }
                 TokenKind::BlockComment(prev_token) => {
-                    if prev_token.range.start.line == token.range.start.line {
+                    let diff = token.range.start.line.abs_diff(prev_token.range.start.line);
+                    if diff == 0 {
                         self.current_line.push_str("  ");
                     } else {
-                        self.push_line();
+                        for _ in 0..min(diff, self.config.max_empty_lines) {
+                            self.push_line();
+                        }
                     }
                 }
                 TokenKind::LineComment(prev_token) => {
-                    if prev_token.range.start.line == token.range.start.line {
+                    let diff = token.range.start.line.abs_diff(prev_token.range.start.line);
+                    if diff == 0 {
                         self.current_line.push_str("  ");
                     } else {
-                        self.push_line();
+                        for _ in 0..min(diff, self.config.max_empty_lines) {
+                            self.push_line();
+                        }
                     }
                 }
             }

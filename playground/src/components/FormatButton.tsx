@@ -3,7 +3,7 @@ import { useState, forwardRef } from "react";
 import { format_keyvalue } from "valve_kv_tools";
 import MuiAlert, { AlertProps } from "@mui/material/Alert";
 
-import { HeaderProps, Settings } from "../interfaces";
+import { HeaderProps, Config } from "../interfaces";
 
 export const Alert = forwardRef<HTMLDivElement, AlertProps>(function Alert(
   props,
@@ -32,7 +32,7 @@ export function FormatButton(props: HeaderProps) {
         variant="contained"
         style={{ backgroundColor: "grey", marginLeft: "auto" }}
         onClick={(_) => {
-          props.setCode(format_keyvalue(props.code));
+          props.setCode(format_keyvalue(props.code, props.settings as Config));
         }}
       >
         Format

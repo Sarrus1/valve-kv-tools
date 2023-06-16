@@ -1,5 +1,5 @@
 import { useState, useRef } from "react";
-import { Settings } from "./interfaces";
+import { Config } from "./interfaces";
 import Editor from "@monaco-editor/react";
 import Header from "./components/Header";
 import SettingsPanel from "./components/SettingsPanel";
@@ -9,7 +9,7 @@ import { makeDefaultSettings } from "./utils";
 
 function App() {
   const [code, setCode] = useState(defaultCode);
-  const [settings, setSettings] = useState<Settings>(makeDefaultSettings());
+  const [settings, setSettings] = useState<Config>(makeDefaultSettings());
 
   const editorRef = useRef(null);
 

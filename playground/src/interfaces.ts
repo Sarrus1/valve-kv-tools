@@ -1,29 +1,23 @@
-export interface Settings {
-  breaks_before_function_decl: number;
-  breaks_before_function_def: number;
-  breaks_before_enum: number;
-  breaks_before_enum_struct: number;
-  breaks_before_methodmap: number;
-  brace_wrapping_before_function: boolean;
-  brace_wrapping_before_loop: boolean;
-  brace_wrapping_before_condition: boolean;
-  brace_wrapping_before_enum_struct: boolean;
-  brace_wrapping_before_enum: boolean;
-  brace_wrapping_before_typeset: boolean;
-  brace_wrapping_before_funcenum: boolean;
-  brace_wrapping_before_methodmap: boolean;
-  brace_wrapping_before_methodmap_property: boolean;
+export interface Config {
+    /* Should the formatter use tabs or spaces for indentation. */
+    use_tabs: boolean,
+
+    /* Number of tabs or spaces to use per indent level. */
+    indent_size: number,
+
+    /* Maximum number of consecutive empty lines. */
+    max_empty_lines: number,
 }
 
 export interface HeaderProps {
   readonly code: string;
-  settings: Settings;
+  settings: Config;
   setCode: React.Dispatch<React.SetStateAction<string>>;
 }
 
 export interface SettingsPanelProps {
-  settings: Settings;
-  setSettings: React.Dispatch<React.SetStateAction<Settings>>;
+  settings: Config;
+  setSettings: React.Dispatch<React.SetStateAction<Config>>;
 }
 
 export interface SettingRowBoolProps {
