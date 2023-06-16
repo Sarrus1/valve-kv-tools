@@ -13,7 +13,7 @@ pub(super) struct Emitter {
     /// Indexes of line breaks in the input string, in reverse order.
     pub(super) line_breaks: Vec<usize>,
     pub(super) line_nb: usize,
-    pub(super) line_start: usize,
+    pub(super) first_col_line: usize,
     prev_token: Option<TokenKind>,
 }
 
@@ -100,10 +100,24 @@ impl Emitter {
                 TokenKind::LBrace | TokenKind::RBrace => {
                     self.push_line();
                 }
-                _ => (),
+                TokenKind::BlockComment(prev_token) => {
+                    if prev_token.range.start.line == token.range.start.line {
+                        self.current_line.push_str("  ");
+                    } else {
+                        self.push_line();
+                    }
+                }
+                TokenKind::LineComment(prev_token) => {
+                    if prev_token.range.start.line == token.range.start.line {
+                        self.current_line.push_str("  ");
+                    } else {
+                        self.push_line();
+                    }
+                }
             }
         }
         self.current_line.push_str(token.text.as_str());
+        self.push_line();
     }
 
     fn emit_block_comment(&mut self, token: &KvToken) {
@@ -122,7 +136,20 @@ impl Emitter {
                 TokenKind::LBrace | TokenKind::RBrace => {
                     self.push_line();
                 }
-                _ => (),
+                TokenKind::BlockComment(prev_token) => {
+                    if prev_token.range.start.line == token.range.start.line {
+                        self.current_line.push_str("  ");
+                    } else {
+                        self.push_line();
+                    }
+                }
+                TokenKind::LineComment(prev_token) => {
+                    if prev_token.range.start.line == token.range.start.line {
+                        self.current_line.push_str("  ");
+                    } else {
+                        self.push_line();
+                    }
+                }
             }
         }
         self.current_line.push_str(token.text.as_str());

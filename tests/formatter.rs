@@ -187,3 +187,18 @@ fn formatter_key_section_suffix_block_comment() {
     let output = format_keyvalue(input, FormatterConfig::default()).unwrap();
     assert_eq!(input, output);
 }
+
+#[test]
+fn formatter_multiple_comments() {
+    let input = r#""key"
+{
+    "key"    "value"
+    // comment
+    // comment
+    /* comment */
+    // comment
+}
+/* comment */"#;
+    let output = format_keyvalue(input, FormatterConfig::default()).unwrap();
+    assert_eq!(input, output);
+}

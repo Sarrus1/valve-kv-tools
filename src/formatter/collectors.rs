@@ -19,25 +19,29 @@ impl Emitter {
     }
 
     fn span_to_range(&mut self, span: Span) -> Range {
-        let start_line = self.line_nb;
-        let line_start = span.start() - self.line_start;
+        let mut line_nb = self.line_nb;
+        let mut first_col_line = self.first_col_line;
         while let Some(line_break) = self.line_breaks.last() {
-            if *line_break >= span.end() || *line_break < span.start() {
+            if *line_break >= span.end() {
                 break;
             }
-            self.line_start = *line_break + 1;
+            if *line_break < span.start() {
+                first_col_line = *line_break + 1;
+                line_nb += 1;
+            }
+            self.first_col_line = *line_break + 1;
             self.line_nb += 1;
             self.line_breaks.pop();
         }
 
         Range {
             start: Position {
-                line: start_line as u32,
-                character: line_start as u32,
+                line: line_nb as u32,
+                character: (span.start() - first_col_line) as u32,
             },
             end: Position {
                 line: self.line_nb as u32,
-                character: (span.end() - self.line_start) as u32,
+                character: (span.end() - self.first_col_line) as u32,
             },
         }
     }
