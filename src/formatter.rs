@@ -1,103 +1,248 @@
 use crate::{KeyValueParser, Rule};
-use pest::{iterators::Pair, Parser};
+use lsp_types::{Position, Range};
+use pest::{iterators::Pair, Parser, Span};
+
+#[derive(Debug, Clone, PartialEq, Eq, Default)]
+struct KvToken {
+    text: String,
+    range: Range,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq)]
+enum TokenKind {
+    Key(KvToken),
+    Value(KvToken),
+    LineComment(KvToken),
+    BlockComment(KvToken),
+    LBrace,
+    RBrace,
+}
 
 #[derive(Debug, Clone, PartialEq, Eq, Default)]
 struct Writer {
     indent: usize,
     buffer: Vec<String>,
     current_line: String,
+    tokens: Vec<TokenKind>,
+
+    /// Indexes of line breaks in the input string, in reverse order.
+    line_breaks: Vec<usize>,
+    line_nb: usize,
+    line_start: usize,
 }
 
 impl Writer {
-    fn write_keyvalue(&mut self, pair: Pair<Rule>) {
-        let pairs: Vec<Pair<Rule>> = pair.into_inner().collect();
-        let mut pairs_iter = pairs.iter().peekable();
-        while let Some(sub_pair) = pairs_iter.next() {
+    fn collect_linebreaks(&mut self, input: &str) {
+        for (i, c) in input.chars().enumerate() {
+            if c == '\n' {
+                self.line_breaks.push(i);
+            }
+        }
+        self.line_breaks.reverse();
+    }
+
+    fn span_to_range(&mut self, span: Span) -> Range {
+        let start_line = self.line_nb;
+        let line_start = span.start() - self.line_start;
+        while let Some(line_break) = self.line_breaks.last() {
+            if *line_break >= span.end() || *line_break < span.start() {
+                break;
+            }
+            self.line_start = *line_break + 1;
+            self.line_nb += 1;
+            self.line_breaks.pop();
+        }
+
+        Range {
+            start: Position {
+                line: start_line as u32,
+                character: line_start as u32,
+            },
+            end: Position {
+                line: self.line_nb as u32,
+                character: (span.end() - self.line_start) as u32,
+            },
+        }
+    }
+
+    pub(self) fn collect_tokens(
+        &mut self,
+        input: &str,
+    ) -> Result<(), Box<pest::error::Error<Rule>>> {
+        self.collect_linebreaks(input);
+        let pairs = KeyValueParser::parse(Rule::start, input)?;
+
+        for pair in pairs {
+            if let Rule::start = pair.as_rule() {
+                for sub_pair in pair.into_inner() {
+                    match sub_pair.as_rule() {
+                        Rule::keyvalue => self.collect_keyvalue(sub_pair),
+                        Rule::COMMENT => self.collect_comment(sub_pair),
+                        _ => eprintln!(
+                            "unhandled rule in token collection: {:?}",
+                            sub_pair.as_rule()
+                        ),
+                    }
+                }
+            }
+        }
+
+        Ok(())
+    }
+
+    fn collect_keyvalue(&mut self, pair: Pair<Rule>) {
+        let pair_inner = pair.into_inner();
+        for sub_pair in pair_inner {
             match sub_pair.as_rule() {
                 Rule::key => {
-                    self.current_line.push_str(sub_pair.as_str());
-                    if let Some(next) = pairs_iter.peek() {
-                        match next.as_rule() {
-                            Rule::COMMENT => {
-                                if let Some(next) = pairs_iter.next() {
+                    let token = KvToken {
+                        text: sub_pair.as_str().to_string(),
+                        range: self.span_to_range(sub_pair.as_span()),
+                    };
+                    self.tokens.push(TokenKind::Key(token))
+                }
+                Rule::value => {
+                    let token = KvToken {
+                        text: sub_pair.as_str().to_string(),
+                        range: self.span_to_range(sub_pair.as_span()),
+                    };
+                    self.tokens.push(TokenKind::Value(token))
+                }
+                Rule::section => self.collect_section(sub_pair),
+                Rule::COMMENT => self.collect_comment(sub_pair),
+                _ => eprintln!(
+                    "unhandled rule in keyvalue collection: {:?}",
+                    sub_pair.as_rule()
+                ),
+            }
+        }
+    }
+
+    fn collect_comment(&mut self, pair: Pair<Rule>) {
+        let token = KvToken {
+            text: pair.as_str().to_string(),
+            range: self.span_to_range(pair.as_span()),
+        };
+        if pair.as_str().starts_with("//") {
+            self.tokens.push(TokenKind::LineComment(token))
+        } else {
+            self.tokens.push(TokenKind::BlockComment(token))
+        }
+    }
+
+    fn collect_section(&mut self, pair: Pair<Rule>) {
+        self.tokens.push(TokenKind::LBrace);
+        let pair_inner = pair.into_inner();
+        for sub_pair in pair_inner {
+            match sub_pair.as_rule() {
+                Rule::keyvalue => self.collect_keyvalue(sub_pair),
+                Rule::COMMENT => self.collect_comment(sub_pair),
+                _ => eprintln!(
+                    "unhandled rule in section collection: {:?}",
+                    sub_pair.as_rule()
+                ),
+            }
+        }
+        self.tokens.push(TokenKind::RBrace);
+    }
+}
+
+impl Writer {
+    // Tokens should handle line breaks before they are written, i.e the LBrace tokens handles the line break before it.
+    fn emit(&mut self) {
+        let mut prev_token: Option<TokenKind> = None;
+        // FIXME: This clone is horrible.
+        self.tokens.reverse();
+        while let Some(token_kind) = self.tokens.pop() {
+            match &token_kind {
+                TokenKind::Key(token) => {
+                    self.push_line();
+                    self.current_line.push_str(token.text.as_str());
+                }
+                TokenKind::Value(token) => {
+                    if let Some(prev_token_kind) = prev_token {
+                        match prev_token_kind {
+                            TokenKind::Key(_) => {
+                                self.current_line.push_str("    ");
+                            }
+                            TokenKind::LineComment(prev_token) => {
+                                // This should not be possible, but just in case.
+                                if prev_token.range.start.line == token.range.start.line {
                                     self.current_line.push_str("  ");
-                                    self.current_line.push_str(next.as_str());
-                                }
-                                if let Some(next) = pairs_iter.peek() {
-                                    if next.as_rule() == Rule::value {
-                                        self.current_line.push_str("  ");
-                                    }
+                                } else {
+                                    self.push_line();
                                 }
                             }
-                            Rule::section => (),
-                            Rule::value => {
-                                self.current_line.push_str("    ");
+                            TokenKind::BlockComment(prev_token) => {
+                                if prev_token.range.start.line == token.range.start.line {
+                                    self.current_line.push_str("  ");
+                                } else {
+                                    self.push_line();
+                                }
                             }
                             _ => (),
                         }
                     }
-                }
-                Rule::value => {
-                    self.current_line.push_str(sub_pair.as_str());
-                    if let Some(next) = pairs_iter.peek() {
-                        match next.as_rule() {
-                            Rule::COMMENT => {
-                                self.current_line.push_str("  ");
-                                self.current_line.push_str(next.as_str());
-                            }
-                            _ => println!("unhandled rule: {:?}", next.as_rule()),
-                        }
-                    }
-                }
-                Rule::section => {
-                    self.write_section(sub_pair.clone());
-                }
-                _ => (),
-            }
-        }
-    }
 
-    fn write_section(&mut self, pair: Pair<Rule>) {
-        self.push_line();
-        self.current_line.push('{');
-        self.push_line();
-        self.indent += 1;
-        let mut pairs_iter = pair.into_inner().peekable();
-        while let Some(sub_pair) = pairs_iter.next() {
-            match sub_pair.as_rule() {
-                Rule::keyvalue => {
-                    self.write_keyvalue(sub_pair);
-                    if let Some(next) = pairs_iter.peek() {
-                        if next.as_rule() == Rule::COMMENT {
-                            // FIXME: This does not work for multiple comments.
-                            if let Some(next) = pairs_iter.next() {
+                    self.current_line.push_str(token.text.as_str());
+                }
+                TokenKind::LBrace => {
+                    self.push_line();
+                    self.current_line.push('{');
+                    self.push_line();
+                    self.indent += 1;
+                }
+                TokenKind::RBrace => {
+                    self.push_line();
+                    self.indent -= 1;
+                    self.current_line.push('}');
+                }
+                TokenKind::LineComment(token) => {
+                    if let Some(prev_token_kind) = prev_token {
+                        match prev_token_kind {
+                            TokenKind::Key(_) => {
                                 self.current_line.push_str("  ");
-                                self.current_line.push_str(next.as_str());
                             }
-                            if let Some(next) = pairs_iter.peek() {
-                                if next.as_rule() == Rule::keyvalue {
+                            TokenKind::Value(prev_token) => {
+                                if prev_token.range.start.line == token.range.start.line {
                                     self.current_line.push_str("  ");
+                                } else {
+                                    self.push_line();
                                 }
                             }
+                            TokenKind::LBrace | TokenKind::RBrace => {
+                                self.push_line();
+                            }
+                            _ => (),
                         }
                     }
-                    self.push_line();
+                    self.current_line.push_str(token.text.as_str());
                 }
-                Rule::COMMENT => {
-                    // This only happens between keyvalues.
-                    self.write_comment(sub_pair);
-                    self.push_line();
+                TokenKind::BlockComment(token) => {
+                    if let Some(prev_token_kind) = prev_token {
+                        match prev_token_kind {
+                            TokenKind::Key(_) => {
+                                self.current_line.push_str("  ");
+                            }
+                            TokenKind::Value(prev_token) => {
+                                if prev_token.range.start.line == token.range.start.line {
+                                    self.current_line.push_str("  ");
+                                } else {
+                                    self.push_line();
+                                }
+                            }
+                            TokenKind::LBrace | TokenKind::RBrace => {
+                                self.push_line();
+                            }
+                            _ => (),
+                        }
+                    }
+                    self.current_line.push_str(token.text.as_str());
                 }
-                _ => (),
             }
+            prev_token = Some(token_kind.clone());
         }
-        self.indent -= 1;
-        self.current_line.push('}');
         self.push_line();
-    }
-
-    fn write_comment(&mut self, pair: Pair<Rule>) {
-        self.current_line.push_str(pair.as_str());
     }
 
     fn indent(&self) -> String {
@@ -116,38 +261,7 @@ impl Writer {
 
 pub fn format_keyvalue(input: &str) -> Result<String, Box<pest::error::Error<Rule>>> {
     let mut writer = Writer::default();
-    let pairs = KeyValueParser::parse(Rule::start, input)?;
-
-    for pair in pairs {
-        if let Rule::start = pair.as_rule() {
-            let mut pair_iter = pair.into_inner().peekable();
-            while let Some(sub_pair) = pair_iter.next() {
-                match sub_pair.as_rule() {
-                    Rule::keyvalue => {
-                        writer.write_keyvalue(sub_pair);
-                        if let Some(next_pair) = pair_iter.peek() {
-                            if let Rule::COMMENT = next_pair.as_rule() {
-                                if let Some(last) = writer.buffer.last() {
-                                    if last.ends_with('}') {
-                                        writer.push_line();
-                                        continue;
-                                    }
-                                }
-                                writer.current_line.push_str("  ");
-                                continue;
-                            }
-                        }
-                        writer.push_line();
-                    }
-                    Rule::COMMENT => {
-                        writer.write_comment(sub_pair);
-                        writer.push_line();
-                    }
-                    _ => println!("unhandled rule: {:?}", sub_pair.as_rule()),
-                }
-            }
-        }
-    }
-
+    writer.collect_tokens(input)?;
+    writer.emit();
     Ok(writer.buffer.join("\n"))
 }
