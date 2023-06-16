@@ -1,9 +1,9 @@
-use valve_kv_tools::format_keyvalue;
+use valve_kv_tools::{format_keyvalue, FormatterConfig};
 
 #[test]
 fn formatter_key_value() {
     let input = r#""key"    "value""#;
-    let output = format_keyvalue(input).unwrap();
+    let output = format_keyvalue(input, FormatterConfig::default()).unwrap();
     assert_eq!(input, output);
 }
 
@@ -11,9 +11,9 @@ fn formatter_key_value() {
 fn formatter_key_section() {
     let input = r#""key"
 {
-  "key"    "value"
+    "key"    "value"
 }"#;
-    let output = format_keyvalue(input).unwrap();
+    let output = format_keyvalue(input, FormatterConfig::default()).unwrap();
     assert_eq!(input, output);
 }
 
@@ -21,11 +21,11 @@ fn formatter_key_section() {
 fn formatter_key_section_multiple() {
     let input = r#""key"
 {
-  "key"    "value"
-  "key"    "value"
-  "key"    "value"
+    "key"    "value"
+    "key"    "value"
+    "key"    "value"
 }"#;
-    let output = format_keyvalue(input).unwrap();
+    let output = format_keyvalue(input, FormatterConfig::default()).unwrap();
     assert_eq!(input, output);
 }
 
@@ -33,14 +33,14 @@ fn formatter_key_section_multiple() {
 fn formatter_key_nested() {
     let input = r#""key"
 {
-  "key"    "value"
-  "key"
-  {
     "key"    "value"
-  }
-  "key"    "value"
+    "key"
+    {
+        "key"    "value"
+    }
+    "key"    "value"
 }"#;
-    let output = format_keyvalue(input).unwrap();
+    let output = format_keyvalue(input, FormatterConfig::default()).unwrap();
     assert_eq!(input, output);
 }
 
@@ -48,21 +48,21 @@ fn formatter_key_nested() {
 fn formatter_key_value_prefix_comment() {
     let input = r#"/* comment */
 "key"    "value""#;
-    let output = format_keyvalue(input).unwrap();
+    let output = format_keyvalue(input, FormatterConfig::default()).unwrap();
     assert_eq!(input, output);
 }
 
 #[test]
 fn formatter_key_value_suffix_comment() {
     let input = r#""key"    "value"  // comment"#;
-    let output = format_keyvalue(input).unwrap();
+    let output = format_keyvalue(input, FormatterConfig::default()).unwrap();
     assert_eq!(input, output);
 }
 
 #[test]
 fn formatter_key_value_middle_comment() {
     let input = r#""key"  /* comment */  "value""#;
-    let output = format_keyvalue(input).unwrap();
+    let output = format_keyvalue(input, FormatterConfig::default()).unwrap();
     assert_eq!(input, output);
 }
 
@@ -71,9 +71,9 @@ fn formatter_key_section_prefix_block_comment() {
     let input = r#"/* comment */
 "key"
 {
-  "key"    "value"
+    "key"    "value"
 }"#;
-    let output = format_keyvalue(input).unwrap();
+    let output = format_keyvalue(input, FormatterConfig::default()).unwrap();
     assert_eq!(input, output);
 }
 
@@ -82,9 +82,9 @@ fn formatter_key_section_prefix_line_comment() {
     let input = r#"// comment
 "key"
 {
-  "key"    "value"
+    "key"    "value"
 }"#;
-    let output = format_keyvalue(input).unwrap();
+    let output = format_keyvalue(input, FormatterConfig::default()).unwrap();
     assert_eq!(input, output);
 }
 
@@ -92,9 +92,9 @@ fn formatter_key_section_prefix_line_comment() {
 fn formatter_key_section_middle_block_comment() {
     let input = r#""key"  /* comment */
 {
-  "key"    "value"
+    "key"    "value"
 }"#;
-    let output = format_keyvalue(input).unwrap();
+    let output = format_keyvalue(input, FormatterConfig::default()).unwrap();
     assert_eq!(input, output);
 }
 
@@ -102,9 +102,9 @@ fn formatter_key_section_middle_block_comment() {
 fn formatter_key_section_middle_line_comment() {
     let input = r#""key"  // comment
 {
-  "key"    "value"
+    "key"    "value"
 }"#;
-    let output = format_keyvalue(input).unwrap();
+    let output = format_keyvalue(input, FormatterConfig::default()).unwrap();
     assert_eq!(input, output);
 }
 
@@ -112,10 +112,10 @@ fn formatter_key_section_middle_line_comment() {
 fn formatter_key_section_middle_suffix_line_comment() {
     let input = r#""key"
 {
-  // comment
-  "key"    "value"
+    // comment
+    "key"    "value"
 }"#;
-    let output = format_keyvalue(input).unwrap();
+    let output = format_keyvalue(input, FormatterConfig::default()).unwrap();
     assert_eq!(input, output);
 }
 
@@ -123,10 +123,10 @@ fn formatter_key_section_middle_suffix_line_comment() {
 fn formatter_key_section_middle_suffix_block_comment() {
     let input = r#""key"
 {
-  /* comment */
-  "key"    "value"
+    /* comment */
+    "key"    "value"
 }"#;
-    let output = format_keyvalue(input).unwrap();
+    let output = format_keyvalue(input, FormatterConfig::default()).unwrap();
     assert_eq!(input, output);
 }
 
@@ -134,49 +134,56 @@ fn formatter_key_section_middle_suffix_block_comment() {
 fn formatter_key_section_key_value_prefix_block_comment() {
     let input = r#""key"
 {
-  /* comment */  "key"    "value"
+    /* comment */  "key"    "value"
 }"#;
     let output = r#""key"
 {
-  /* comment */
-  "key"    "value"
+    /* comment */
+    "key"    "value"
 }"#;
-    assert_eq!(output, format_keyvalue(input).unwrap());
+    assert_eq!(
+        output,
+        format_keyvalue(input, FormatterConfig::default()).unwrap()
+    );
 }
 
 #[test]
 fn formatter_key_section_key_value_middle_block_comment() {
     let input = r#""key"
 {
-  "key"  /* comment */  "value"
+    "key"  /* comment */  "value"
 }"#;
-    assert_eq!(input, format_keyvalue(input).unwrap());
+    let output = format_keyvalue(input, FormatterConfig::default()).unwrap();
+    assert_eq!(input, output);
 }
 
 #[test]
 fn formatter_key_section_end_prefix_line_comment() {
     let input = r#""key"
 {
-  "key"    "value"  // comment
+    "key"    "value"  // comment
 }"#;
-    assert_eq!(input, format_keyvalue(input).unwrap());
+    let output = format_keyvalue(input, FormatterConfig::default()).unwrap();
+    assert_eq!(input, output);
 }
 
 #[test]
 fn formatter_key_section_end_prefix_block_comment() {
     let input = r#""key"
 {
-  "key"    "value"  /* comment */
+    "key"    "value"  /* comment */
 }"#;
-    assert_eq!(input, format_keyvalue(input).unwrap());
+    let output = format_keyvalue(input, FormatterConfig::default()).unwrap();
+    assert_eq!(input, output);
 }
 
 #[test]
 fn formatter_key_section_suffix_block_comment() {
     let input = r#""key"
 {
-  "key"    "value"
+    "key"    "value"
 }
 /* comment */"#;
-    assert_eq!(input, format_keyvalue(input).unwrap());
+    let output = format_keyvalue(input, FormatterConfig::default()).unwrap();
+    assert_eq!(input, output);
 }

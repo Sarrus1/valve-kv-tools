@@ -1,8 +1,11 @@
+use crate::FormatterConfig;
+
 use super::tokens::{KvToken, TokenKind};
 
 #[derive(Debug, Clone, PartialEq, Eq, Default)]
 pub(super) struct Emitter {
     pub(super) buffer: Vec<String>,
+    config: FormatterConfig,
     indent: usize,
     current_line: String,
     pub(super) tokens: Vec<TokenKind>,
@@ -15,7 +18,15 @@ pub(super) struct Emitter {
 }
 
 impl Emitter {
-    // Tokens should handle line breaks before they are written, i.e the LBrace tokens handles the line break before it.
+    pub(super) fn new(config: FormatterConfig) -> Self {
+        Self {
+            config,
+            ..Default::default()
+        }
+    }
+
+    // Tokens should handle line breaks before they are written,
+    // i.e the LBrace tokens handles the line break before it.
     pub(super) fn emit(&mut self) {
         self.tokens.reverse();
         while let Some(token_kind) = self.tokens.pop() {
@@ -50,7 +61,7 @@ impl Emitter {
         if let Some(prev_token_kind) = &self.prev_token {
             match prev_token_kind {
                 TokenKind::Key(_) => {
-                    self.current_line.push_str("    ");
+                    self.current_line.push_str(self.indent_string().as_str());
                 }
                 TokenKind::LineComment(prev_token) => {
                     // This should not be possible, but just in case.
@@ -117,8 +128,16 @@ impl Emitter {
         self.current_line.push_str(token.text.as_str());
     }
 
+    fn indent_string(&self) -> String {
+        if self.config.use_tabs {
+            "\t".to_string()
+        } else {
+            " ".repeat(self.config.indent_size as usize)
+        }
+    }
+
     fn indent(&self) -> String {
-        "  ".repeat(self.indent)
+        self.indent_string().repeat(self.indent)
     }
 
     fn push_line(&mut self) {
