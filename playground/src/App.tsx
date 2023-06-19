@@ -1,6 +1,6 @@
 import { useState, useRef } from "react";
 import { Config, ErrorMarker, KvError } from "./interfaces";
-import Editor from "@monaco-editor/react";
+import Editor, { Monaco } from "@monaco-editor/react";
 import Header from "./components/Header";
 import SettingsPanel from "./components/SettingsPanel";
 import "./App.css";
@@ -12,11 +12,11 @@ function App() {
   const [code, setCode] = useState(defaultCode);
   const [settings, setSettings] = useState<Config>(makeDefaultSettings());
 
-  const editorRef = useRef(null);
-  const modelRef = useRef(null);
+  const editorRef = useRef<any>(null);
+  const modelRef = useRef<any>(null);
 
-  function handleEditorDidMount(editor: any, monaco: any) {
-    editorRef.current = monaco.editor;
+  function handleEditorDidMount(editor: any, monaco: Monaco) {
+    editorRef.current = editor;
     modelRef.current = editor.getModel();
   }
 
@@ -34,7 +34,7 @@ function App() {
           message: e.message,
         };
       });
-      editorRef.current.setModelMarkers(
+      editorRef.current?.setModelMarkers(
         modelRef.current,
         "error",
         errorMarkers
