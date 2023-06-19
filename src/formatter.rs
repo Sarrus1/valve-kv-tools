@@ -1,9 +1,9 @@
 use serde::{Deserialize, Serialize};
 
-use crate::Rule;
 use self::emitter::Emitter;
+use crate::Rule;
 
-mod collectors;
+pub(crate) mod collectors;
 mod emitter;
 mod tokens;
 
@@ -17,7 +17,6 @@ pub fn format_keyvalue(
 
     Ok(emitter.buffer.join("\n"))
 }
-
 
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 pub struct FormatterConfig {

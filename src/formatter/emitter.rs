@@ -1,4 +1,7 @@
-use super::tokens::{KvToken, TokenKind};
+use super::{
+    collectors::RangeCollector,
+    tokens::{KvToken, TokenKind},
+};
 use crate::FormatterConfig;
 
 use std::cmp::min;
@@ -10,11 +13,7 @@ pub(super) struct Emitter {
     indent: usize,
     current_line: String,
     pub(super) tokens: Vec<TokenKind>,
-
-    /// Indexes of line breaks in the input string, in reverse order.
-    pub(super) line_breaks: Vec<usize>,
-    pub(super) line_nb: usize,
-    pub(super) first_col_line: usize,
+    pub(super) range_collector: RangeCollector,
     prev_token: Option<TokenKind>,
 }
 

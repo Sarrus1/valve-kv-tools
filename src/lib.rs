@@ -1,4 +1,4 @@
-mod formatter;
+pub(crate) mod formatter;
 mod linter;
 mod serializer;
 

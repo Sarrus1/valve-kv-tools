@@ -8,8 +8,16 @@ use super::{
     tokens::{KvToken, TokenKind},
 };
 
-impl Emitter {
-    pub(super) fn collect_linebreaks(&mut self, input: &str) {
+#[derive(Debug, Clone, PartialEq, Eq, Default)]
+pub(crate) struct RangeCollector {
+    /// Indexes of line breaks in the input string, in reverse order.
+    pub(super) line_breaks: Vec<usize>,
+    pub(super) line_nb: usize,
+    pub(super) first_col_line: usize,
+}
+
+impl RangeCollector {
+    pub(crate) fn collect_linebreaks(&mut self, input: &str) {
         for (i, c) in input.chars().enumerate() {
             if c == '\n' {
                 self.line_breaks.push(i);
@@ -18,7 +26,7 @@ impl Emitter {
         self.line_breaks.reverse();
     }
 
-    fn span_to_range(&mut self, span: Span) -> Range {
+    pub(crate) fn span_to_range(&mut self, span: Span) -> Range {
         let mut line_nb = self.line_nb;
         let mut first_col_line = self.first_col_line;
         while let Some(line_break) = self.line_breaks.last() {
@@ -45,12 +53,14 @@ impl Emitter {
             },
         }
     }
+}
 
+impl Emitter {
     pub(super) fn collect_tokens(
         &mut self,
         input: &str,
     ) -> Result<(), Box<pest::error::Error<Rule>>> {
-        self.collect_linebreaks(input);
+        self.range_collector.collect_linebreaks(input);
         let pairs = KeyValueParser::parse(Rule::start, input)?;
 
         for pair in pairs {
@@ -78,14 +88,14 @@ impl Emitter {
                 Rule::key => {
                     let token = KvToken {
                         text: sub_pair.as_str().to_string(),
-                        range: self.span_to_range(sub_pair.as_span()),
+                        range: self.range_collector.span_to_range(sub_pair.as_span()),
                     };
                     self.tokens.push(TokenKind::Key(token))
                 }
                 Rule::value => {
                     let token = KvToken {
                         text: sub_pair.as_str().to_string(),
-                        range: self.span_to_range(sub_pair.as_span()),
+                        range: self.range_collector.span_to_range(sub_pair.as_span()),
                     };
                     self.tokens.push(TokenKind::Value(token))
                 }
@@ -102,7 +112,7 @@ impl Emitter {
     fn collect_comment(&mut self, pair: Pair<Rule>) {
         let token = KvToken {
             text: pair.as_str().to_string(),
-            range: self.span_to_range(pair.as_span()),
+            range: self.range_collector.span_to_range(pair.as_span()),
         };
         if pair.as_str().starts_with("//") {
             self.tokens.push(TokenKind::LineComment(token))
