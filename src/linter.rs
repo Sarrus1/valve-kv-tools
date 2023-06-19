@@ -22,11 +22,11 @@ pub fn lint_keyvalue(input: &str) -> Vec<KvError> {
                 LineColLocation::Pos(pos) => Range {
                     start: Position {
                         line: pos.0 as u32,
-                        character: 0,
+                        character: pos.1 as u32,
                     },
                     end: Position {
-                        line: pos.1 as u32,
-                        character: 0,
+                        line: pos.0 as u32,
+                        character: pos.1 as u32,
                     },
                 },
                 LineColLocation::Span(start, end) => Range {
