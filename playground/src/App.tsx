@@ -1,35 +1,44 @@
 import { useState, useRef } from "react";
-import { Config } from "./interfaces";
+import { Config, ErrorMarker, KvError } from "./interfaces";
 import Editor from "@monaco-editor/react";
 import Header from "./components/Header";
 import SettingsPanel from "./components/SettingsPanel";
 import "./App.css";
 import { defaultCode } from "./text";
 import { makeDefaultSettings } from "./utils";
+import { lint_keyvalue } from "valve_kv_tools";
 
 function App() {
   const [code, setCode] = useState(defaultCode);
   const [settings, setSettings] = useState<Config>(makeDefaultSettings());
 
   const editorRef = useRef(null);
+  const modelRef = useRef(null);
 
   function handleEditorDidMount(editor: any, monaco: any) {
-    const errorMarkers = [
-      {
-        startLineNumber: 1,
-        startColumn: 1,
-        endLineNumber: 1,
-        endColumn: 5,
-        message: 'Syntax error',
-      },
-    ];
-    editorRef.current = editor;
-    monaco.editor.setModelMarkers(editor.getModel(), 'error', errorMarkers);
+    editorRef.current = monaco.editor;
+    modelRef.current = editor.getModel();
   }
 
   function handleEditorChange(value: string | undefined, event: any) {
     if (value !== undefined) {
       setCode(value);
+      const lint_results: KvError[] = lint_keyvalue(value);
+      console.log(lint_results);
+      const errorMarkers: ErrorMarker[] = lint_results.map((e) => {
+        return {
+          startLineNumber: e.range.start.line,
+          startColumn: e.range.start.character,
+          endLineNumber: e.range.end.line,
+          endColumn: e.range.end.character,
+          message: e.message,
+        };
+      });
+      editorRef.current.setModelMarkers(
+        modelRef.current,
+        "error",
+        errorMarkers
+      );
     }
   }
 

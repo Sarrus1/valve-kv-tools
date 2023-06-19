@@ -7,21 +7,10 @@ use serde::{Deserialize, Serialize};
 use crate::{KeyValue, Value};
 
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
-pub struct ParsingError {
+pub struct KvError {
     range: Range,
+    additional_ranges: Vec<Range>,
     message: String,
-}
-
-#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
-pub struct DuplicateError {
-    range: Range,
-    original_declaration_range: Range,
-    message: String,
-}
-
-pub enum KvError {
-    ParsingError(ParsingError),
-    DuplicateError(DuplicateError),
 }
 
 pub fn lint_keyvalue(input: &str) -> Vec<KvError> {
@@ -51,22 +40,21 @@ pub fn lint_keyvalue(input: &str) -> Vec<KvError> {
                     },
                 },
             };
-            errors.push(KvError::ParsingError(ParsingError {
+            errors.push(KvError {
                 range,
+                additional_ranges: vec![],
                 message: err.variant.message().to_string(),
-            }));
+            });
         }
         Ok(kv) => {
             let mut dups = vec![];
             search_for_duplicates(&mut dups, &vec![kv]);
             for dup in dups {
-                for dup_range in dup.duplicate_declarations {
-                    errors.push(KvError::DuplicateError(DuplicateError {
-                        range: dup_range,
-                        original_declaration_range: dup.original_declaration,
-                        message: format!("Duplicate entry for key \"{}\"", dup.key),
-                    }))
-                }
+                errors.push(KvError {
+                    range: dup.original_declaration,
+                    additional_ranges: dup.duplicate_declarations,
+                    message: format!("Duplicate entry for key \"{}\"", dup.key),
+                });
             }
         }
     }
