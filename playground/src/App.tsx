@@ -1,4 +1,6 @@
 import { useState, useRef } from "react";
+import { FormatterConfig, lintKeyvalue } from "valve_kv_tools";
+
 import { ErrorMarker } from "./interfaces";
 import Editor, { Monaco } from "@monaco-editor/react";
 import Header from "./components/Header";
@@ -6,7 +8,6 @@ import SettingsPanel from "./components/SettingsPanel";
 import "./App.css";
 import { defaultCode } from "./text";
 import { makeDefaultSettings } from "./utils";
-import { FormatterConfig, lintKeyvalue } from "valve_kv_tools";
 
 function App() {
   const [code, setCode] = useState(defaultCode);
