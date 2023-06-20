@@ -1,16 +1,18 @@
 import { useState, useRef } from "react";
-import { Config, ErrorMarker, KvError } from "./interfaces";
+import { ErrorMarker } from "./interfaces";
 import Editor, { Monaco } from "@monaco-editor/react";
 import Header from "./components/Header";
 import SettingsPanel from "./components/SettingsPanel";
 import "./App.css";
 import { defaultCode } from "./text";
 import { makeDefaultSettings } from "./utils";
-import { lint_keyvalue } from "valve_kv_tools";
+import { FormatterConfig, lintKeyvalue } from "valve_kv_tools";
 
 function App() {
   const [code, setCode] = useState(defaultCode);
-  const [settings, setSettings] = useState<Config>(makeDefaultSettings());
+  const [settings, setSettings] = useState<FormatterConfig>(
+    makeDefaultSettings()
+  );
 
   const editorRef = useRef<any>(null);
   const modelRef = useRef<any>(null);
@@ -23,8 +25,7 @@ function App() {
   function handleEditorChange(value: string | undefined, event: any) {
     if (value !== undefined) {
       setCode(value);
-      const lint_results: KvError[] = lint_keyvalue(value);
-      console.log(lint_results);
+      const lint_results = lintKeyvalue(value);
       const errorMarkers: ErrorMarker[] = lint_results.map((e) => {
         return {
           startLineNumber: e.range.start.line,

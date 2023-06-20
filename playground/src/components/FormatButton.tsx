@@ -1,9 +1,9 @@
 import { Button, Snackbar } from "@mui/material";
 import { useState, forwardRef } from "react";
-import { format_keyvalue } from "valve_kv_tools";
+import { formatKeyvalue } from "valve_kv_tools";
 import MuiAlert, { AlertProps } from "@mui/material/Alert";
 
-import { HeaderProps, Config } from "../interfaces";
+import { HeaderProps } from "../interfaces";
 
 export const Alert = forwardRef<HTMLDivElement, AlertProps>(function Alert(
   props,
@@ -33,9 +33,8 @@ export function FormatButton(props: HeaderProps) {
         style={{ backgroundColor: "grey", marginLeft: "auto" }}
         onClick={(_) => {
           try {
-            props.setCode(format_keyvalue(props.code, props.settings as Config));
-          }
-          catch{
+            props.setCode(formatKeyvalue(props.code, props.settings));
+          } catch {
             setShowError(true);
           }
         }}

@@ -14,7 +14,9 @@ jobs:
         with:
           version: "latest"
       - name: Build wasm
-        run: wasm-pack build --target web
+        run: |
+          wasm-pack build --target web
+          mv valve_kv_tools.d.ts pkg/
       - name: Setup Playground
         run: cd playground && npm i && npm run build
       - name: Get version

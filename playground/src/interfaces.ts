@@ -1,23 +1,14 @@
-export interface Config {
-  /* Should the formatter use tabs or spaces for indentation. */
-  use_tabs: boolean;
-
-  /* Number of tabs or spaces to use per indent level. */
-  indent_size: number;
-
-  /* Maximum number of consecutive empty lines. */
-  max_empty_lines: number;
-}
+import { FormatterConfig } from "valve_kv_tools";
 
 export interface HeaderProps {
   readonly code: string;
-  settings: Config;
+  settings: FormatterConfig;
   setCode: React.Dispatch<React.SetStateAction<string>>;
 }
 
 export interface SettingsPanelProps {
-  settings: Config;
-  setSettings: React.Dispatch<React.SetStateAction<Config>>;
+  settings: FormatterConfig;
+  setSettings: React.Dispatch<React.SetStateAction<FormatterConfig>>;
 }
 
 export interface SettingRowBoolProps {
@@ -34,22 +25,6 @@ export interface SettingRowNumericProps {
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
   ) => void;
   defaultValue: number;
-}
-
-export interface Range {
-  start: Position;
-  end: Position;
-}
-
-export interface Position {
-  line: number;
-  character: number;
-}
-
-export interface KvError {
-  message: string;
-  range: Range;
-  additional_ranges: Range[];
 }
 
 export interface ErrorMarker {
