@@ -56,7 +56,7 @@ export interface KvError {
   /**
    * Error message of the error.
    */
-  message: String;
+  message: string;
 }
 
 /**
