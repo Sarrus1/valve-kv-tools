@@ -35,7 +35,7 @@ jobs:
           registry-url: "https://registry.npmjs.org"
       - name: Build wasm
         run: |
-          wasm-pack build --target web
+          wasm-pack build --release
           mv valve_kv_tools.d.ts pkg/
       - run: |
           cd pkg

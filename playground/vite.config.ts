@@ -13,6 +13,7 @@ export default defineConfig({
   },
   plugins: [react(), wasm()],
   build: {
+    target: "esnext",
     rollupOptions: {
       output: {
         assetFileNames: (assetInfo) => {
