@@ -41,20 +41,20 @@ function SettingsPanel(props: SettingsPanelProps) {
       <SettingRowBool
         name="Use tabs for indentation."
         onChange={(e) => {
-          props.settings.use_tabs = Boolean(e.target.value);
+          props.settings.useTabs = Boolean(e.target.value);
         }}
       />
       <SettingRowNumeric
         name="Number of tabs or spaces to use per indent level."
         onChange={(e) => {
-          props.settings.indent_size = Number(e.target.value);
+          props.settings.indentSize = Number(e.target.value);
         }}
         defaultValue={4}
       />
       <SettingRowNumeric
         name="Maximum empty lines."
         onChange={(e) => {
-          props.settings.max_empty_lines = Number(e.target.value);
+          props.settings.maxEmptyLines = Number(e.target.value);
         }}
         defaultValue={1}
       />

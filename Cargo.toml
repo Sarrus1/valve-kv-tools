@@ -14,7 +14,7 @@ crate-type = ["cdylib", "rlib"]
 path = "src/lib.rs"
 
 [dependencies]
-lsp-types = "0.94.0"
+js-sys = "0.3.64"
 pest = "2.6.0"
 pest_derive = "2.6.0"
 serde = { version = "1.0.164", features = ["derive"] }

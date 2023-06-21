@@ -1,8 +1,7 @@
-use lsp_types::Range;
 use pest::{iterators::Pair, Parser};
 use pest_derive::Parser;
 
-use crate::collectors::RangeCollector;
+use crate::{collectors::RangeCollector, Range};
 
 #[derive(Parser)]
 #[grammar = "valve-kv.pest"]

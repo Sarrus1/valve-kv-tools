@@ -1,4 +1,4 @@
-use lsp_types::Range;
+use crate::Range;
 
 #[derive(Debug, Clone, PartialEq, Eq, Default)]
 pub(super) struct KvToken {

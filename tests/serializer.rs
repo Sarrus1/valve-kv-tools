@@ -1,5 +1,4 @@
-use lsp_types::{Position, Range};
-use valve_kv_tools::{serialize_keyvalue, KeyValue, Value};
+use valve_kv_tools::{serialize_keyvalue, KeyValue, Position, Range, Value};
 
 #[test]
 fn serialize_value() {

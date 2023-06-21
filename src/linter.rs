@@ -1,16 +1,63 @@
 use std::collections::HashMap;
 
-use lsp_types::{Position, Range};
 use pest::error::LineColLocation;
-use serde::{Deserialize, Serialize};
 
-use crate::{KeyValue, Value};
+#[cfg(target_arch = "wasm32")]
+use js_sys::Array;
+#[cfg(target_arch = "wasm32")]
+use wasm_bindgen::{prelude::wasm_bindgen, JsValue};
 
-#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+use crate::{KeyValue, Position, Range, Value};
+
+#[derive(Default, Debug, Clone, PartialEq, Eq)]
 pub struct KvError {
     range: Range,
     additional_ranges: Vec<Range>,
     message: String,
+}
+
+#[cfg(target_arch = "wasm32")]
+impl KvError {
+    pub(crate) fn to_js(&self) -> KvErrorJs {
+        KvErrorJs {
+            range: self.range,
+            additional_ranges: self
+                .additional_ranges
+                .clone()
+                .into_iter()
+                .map(JsValue::from)
+                .collect(),
+            message: self.message.clone(),
+        }
+    }
+}
+
+/// Representation of a KeyValue linter error
+#[cfg(target_arch = "wasm32")]
+#[wasm_bindgen(js_name = KvError, getter_with_clone)]
+#[derive(Default, Debug, Clone, PartialEq, Eq)]
+pub struct KvErrorJs {
+    /// Range of the error
+    #[wasm_bindgen(readonly)]
+    pub range: Range,
+
+    /// Ranges that are related to the error
+    /// For example, the range of duplicate entries in a duplicate error
+    #[wasm_bindgen(js_name = additionalRanges, readonly)]
+    pub additional_ranges: Array,
+
+    /// Error message of the error
+    #[wasm_bindgen(readonly)]
+    pub message: String,
+}
+
+#[cfg(target_arch = "wasm32")]
+#[wasm_bindgen]
+impl KvErrorJs {
+    #[wasm_bindgen(constructor)]
+    pub fn new() -> Self {
+        Self::default()
+    }
 }
 
 pub fn lint_keyvalue(input: &str) -> Vec<KvError> {

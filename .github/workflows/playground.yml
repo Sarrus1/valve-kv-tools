@@ -14,9 +14,7 @@ jobs:
         with:
           version: "latest"
       - name: Build wasm
-        run: |
-          wasm-pack build --release
-          mv valve_kv_tools.d.ts pkg/
+        run: wasm-pack build --release
       - name: Setup Playground
         run: cd playground && npm i && npm run build
       - name: Get version

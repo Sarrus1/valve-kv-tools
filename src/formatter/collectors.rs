@@ -1,7 +1,6 @@
-use lsp_types::{Position, Range};
 use pest::{iterators::Pair, Parser, Span};
 
-use crate::{KeyValueParser, Rule};
+use crate::{KeyValueParser, Position, Range, Rule};
 
 use super::{
     emitter::Emitter,
