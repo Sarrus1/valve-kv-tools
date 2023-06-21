@@ -11,6 +11,7 @@
     "@emotion/react": "^11.10.0",
     "@emotion/styled": "^11.10.0",
     "@mui/material": "^5.9.3",
+    "monaco-editor": "^0.39.0",
     "react": "^17.0.0",
     "react-dom": "^17.0.0",
     "valve_kv_tools": "file:../pkg",

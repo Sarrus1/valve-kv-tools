@@ -39,7 +39,7 @@ function SettingsPanel(props: SettingsPanelProps) {
   return (
     <div style={{ margin: "1rem" }}>
       <SettingRowBool
-        name="Should the formatter use tabs or spaces for indentation."
+        name="Use tabs for indentation."
         onChange={(e) => {
           props.settings.use_tabs = Boolean(e.target.value);
         }}
@@ -52,7 +52,7 @@ function SettingsPanel(props: SettingsPanelProps) {
         defaultValue={4}
       />
       <SettingRowNumeric
-        name="Breaks before enum"
+        name="Maximum empty lines."
         onChange={(e) => {
           props.settings.max_empty_lines = Number(e.target.value);
         }}

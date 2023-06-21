@@ -34,7 +34,8 @@ export function FormatButton(props: HeaderProps) {
         onClick={(_) => {
           try {
             props.setCode(formatKeyvalue(props.code, props.settings));
-          } catch {
+          } catch (err) {
+            console.log(err);
             setShowError(true);
           }
         }}

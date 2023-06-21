@@ -26,11 +26,3 @@ export interface SettingRowNumericProps {
   ) => void;
   defaultValue: number;
 }
-
-export interface ErrorMarker {
-  startLineNumber: number;
-  startColumn: number;
-  endLineNumber: number;
-  endColumn: number;
-  message: string;
-}

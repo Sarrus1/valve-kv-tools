@@ -1,8 +1,8 @@
 import { useState, useRef } from "react";
 import { FormatterConfig, lintKeyvalue } from "valve_kv_tools";
+import Editor, { OnMount, OnChange } from "@monaco-editor/react";
+import * as Monaco from "monaco-editor";
 
-import { ErrorMarker } from "./interfaces";
-import Editor, { Monaco } from "@monaco-editor/react";
 import Header from "./components/Header";
 import SettingsPanel from "./components/SettingsPanel";
 import "./App.css";
@@ -15,34 +15,32 @@ function App() {
     makeDefaultSettings()
   );
 
-  const editorRef = useRef<any>(null);
-  const modelRef = useRef<any>(null);
+  const editorRef = useRef<typeof Monaco.editor | null>(null);
+  const modelRef = useRef<Monaco.editor.ITextModel | null>(null);
 
-  function handleEditorDidMount(editor: any, monaco: Monaco) {
-    editorRef.current = editor;
+  const handleEditorDidMount: OnMount = (editor, monaco) => {
+    editorRef.current = monaco.editor;
     modelRef.current = editor.getModel();
-  }
+  };
 
-  function handleEditorChange(value: string | undefined, event: any) {
-    if (value !== undefined) {
-      setCode(value);
-      const lint_results = lintKeyvalue(value);
-      const errorMarkers: ErrorMarker[] = lint_results.map((e) => {
-        return {
-          startLineNumber: e.range.start.line,
-          startColumn: e.range.start.character,
-          endLineNumber: e.range.end.line,
-          endColumn: e.range.end.character,
-          message: e.message,
-        };
-      });
-      editorRef.current?.setModelMarkers(
-        modelRef.current,
-        "error",
-        errorMarkers
-      );
+  const handleEditorChange: OnChange = (value, _) => {
+    if (value === undefined || modelRef.current === null) {
+      return;
     }
-  }
+    setCode(value);
+    const lintResults = lintKeyvalue(value);
+    const errorMarkers: Monaco.editor.IMarkerData[] = lintResults.map((e) => {
+      return {
+        startLineNumber: e.range.start.line,
+        startColumn: e.range.start.character,
+        endLineNumber: e.range.end.line,
+        endColumn: e.range.end.character,
+        message: e.message,
+        severity: Monaco.MarkerSeverity.Error,
+      };
+    });
+    editorRef.current?.setModelMarkers(modelRef.current, "error", errorMarkers);
+  };
 
   return (
     <div style={{ overflowX: "hidden" }}>
@@ -50,7 +48,7 @@ function App() {
       <div className="grid grid-cols-2">
         <SettingsPanel settings={settings} setSettings={setSettings} />
         <Editor
-          height="93.3vh"
+          height="100vh"
           width="50vw"
           theme="vs-dark"
           defaultLanguage="cpp"
