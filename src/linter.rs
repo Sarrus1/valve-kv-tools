@@ -95,7 +95,7 @@ pub fn lint_keyvalue(input: &str) -> Vec<KvError> {
         }
         Ok(kv) => {
             let mut dups = vec![];
-            search_for_duplicates(&mut dups, &vec![kv]);
+            search_for_duplicates(&mut dups, &[kv]);
             for dup in dups {
                 errors.push(KvError {
                     range: dup.original_declaration,
@@ -125,7 +125,7 @@ impl Duplicate {
     }
 }
 
-fn search_for_duplicates(dups: &mut Vec<Duplicate>, keyvalues: &Vec<KeyValue>) {
+fn search_for_duplicates(dups: &mut Vec<Duplicate>, keyvalues: &[KeyValue]) {
     let mut keys: HashMap<String, Duplicate> = HashMap::default();
     for kv in keyvalues.iter() {
         match &kv.value {

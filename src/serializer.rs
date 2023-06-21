@@ -27,7 +27,7 @@ struct Serializer {
 
 pub fn serialize_keyvalue(input: &str) -> Result<KeyValue, Box<pest::error::Error<Rule>>> {
     let mut serializer = Serializer::default();
-    serializer.range_collector.collect_linebreaks(&input);
+    serializer.range_collector.collect_linebreaks(input);
 
     let pairs = KeyValueParser::parse(Rule::start, input)?;
     let mut kv = KeyValue {

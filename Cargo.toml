@@ -23,3 +23,12 @@ wasm-bindgen = { version = "=0.2.87", features = [
     "strict-macro",
     "serde-serialize",
 ] }
+
+[dev-dependencies]
+criterion = "0.3"
+minreq = { version = "2.7.0", features = ["https"] }
+
+[[bench]]
+name = "bench_main"
+harness = false
+path = "benches/bench_main.rs"

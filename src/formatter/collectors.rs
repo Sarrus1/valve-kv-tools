@@ -68,6 +68,7 @@ impl Emitter {
                     match sub_pair.as_rule() {
                         Rule::keyvalue => self.collect_keyvalue(sub_pair),
                         Rule::COMMENT => self.collect_comment(sub_pair),
+                        Rule::EOI => (),
                         _ => eprintln!(
                             "unhandled rule in token collection: {:?}",
                             sub_pair.as_rule()
