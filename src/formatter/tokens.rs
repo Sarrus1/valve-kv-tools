@@ -12,6 +12,6 @@ pub(super) enum TokenKind {
     Value(KvToken),
     LineComment(KvToken),
     BlockComment(KvToken),
-    LBrace,
-    RBrace,
+    LBrace(KvToken),
+    RBrace(KvToken),
 }

@@ -35,14 +35,46 @@ impl Emitter {
                 TokenKind::Value(token) => self.emit_value(token),
                 TokenKind::LineComment(token) => self.emit_line_comment(token),
                 TokenKind::BlockComment(token) => self.emit_block_comment(token),
-                TokenKind::LBrace => {
-                    self.push_line();
+                TokenKind::LBrace(token) => {
+                    if let Some(prev_token_kind) = &self.prev_token {
+                        match prev_token_kind {
+                            TokenKind::BlockComment(prev_token)
+                            | TokenKind::LineComment(prev_token) => {
+                                let diff =
+                                    token.range.start.line.abs_diff(prev_token.range.start.line);
+                                for _ in 0..min(diff, self.config.max_empty_lines) {
+                                    self.push_line();
+                                }
+                            }
+                            TokenKind::Key(_) => {
+                                self.push_line();
+                            }
+                            _ => (),
+                        }
+                    }
                     self.current_line.push('{');
                     self.push_line();
                     self.indent += 1;
                 }
-                TokenKind::RBrace => {
-                    self.push_line();
+                TokenKind::RBrace(token) => {
+                    if let Some(prev_token_kind) = &self.prev_token {
+                        match prev_token_kind {
+                            TokenKind::BlockComment(prev_token)
+                            | TokenKind::LineComment(prev_token)
+                            | TokenKind::Value(prev_token) => {
+                                let diff =
+                                    token.range.start.line.abs_diff(prev_token.range.start.line);
+                                if diff == 0 {
+                                    self.current_line.push_str("  ");
+                                } else {
+                                    for _ in 0..min(diff, self.config.max_empty_lines) {
+                                        self.push_line();
+                                    }
+                                }
+                            }
+                            _ => (),
+                        }
+                    }
                     self.indent -= 1;
                     self.current_line.push('}');
                 }
@@ -96,30 +128,11 @@ impl Emitter {
                 TokenKind::Key(_) => {
                     self.current_line.push_str("  ");
                 }
-                TokenKind::Value(prev_token) => {
-                    let diff = token.range.start.line.abs_diff(prev_token.range.start.line);
-                    if diff == 0 {
-                        self.current_line.push_str("  ");
-                    } else {
-                        for _ in 0..min(diff, self.config.max_empty_lines) {
-                            self.push_line();
-                        }
-                    }
-                }
-                TokenKind::LBrace | TokenKind::RBrace => {
-                    self.push_line();
-                }
-                TokenKind::BlockComment(prev_token) => {
-                    let diff = token.range.start.line.abs_diff(prev_token.range.start.line);
-                    if diff == 0 {
-                        self.current_line.push_str("  ");
-                    } else {
-                        for _ in 0..min(diff, self.config.max_empty_lines) {
-                            self.push_line();
-                        }
-                    }
-                }
-                TokenKind::LineComment(prev_token) => {
+                TokenKind::LBrace(prev_token)
+                | TokenKind::RBrace(prev_token)
+                | TokenKind::BlockComment(prev_token)
+                | TokenKind::LineComment(prev_token)
+                | TokenKind::Value(prev_token) => {
                     let diff = token.range.start.line.abs_diff(prev_token.range.start.line);
                     if diff == 0 {
                         self.current_line.push_str("  ");
@@ -141,30 +154,11 @@ impl Emitter {
                 TokenKind::Key(_) => {
                     self.current_line.push_str("  ");
                 }
-                TokenKind::Value(prev_token) => {
-                    let diff = token.range.start.line.abs_diff(prev_token.range.start.line);
-                    if diff == 0 {
-                        self.current_line.push_str("  ");
-                    } else {
-                        for _ in 0..min(diff, self.config.max_empty_lines) {
-                            self.push_line();
-                        }
-                    }
-                }
-                TokenKind::LBrace | TokenKind::RBrace => {
-                    self.push_line();
-                }
-                TokenKind::BlockComment(prev_token) => {
-                    let diff = token.range.start.line.abs_diff(prev_token.range.start.line);
-                    if diff == 0 {
-                        self.current_line.push_str("  ");
-                    } else {
-                        for _ in 0..min(diff, self.config.max_empty_lines) {
-                            self.push_line();
-                        }
-                    }
-                }
-                TokenKind::LineComment(prev_token) => {
+                TokenKind::LBrace(prev_token)
+                | TokenKind::RBrace(prev_token)
+                | TokenKind::BlockComment(prev_token)
+                | TokenKind::LineComment(prev_token)
+                | TokenKind::Value(prev_token) => {
                     let diff = token.range.start.line.abs_diff(prev_token.range.start.line);
                     if diff == 0 {
                         self.current_line.push_str("  ");

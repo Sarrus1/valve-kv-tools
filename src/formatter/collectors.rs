@@ -122,10 +122,23 @@ impl Emitter {
     }
 
     fn collect_section(&mut self, pair: Pair<Rule>) {
-        self.tokens.push(TokenKind::LBrace);
         let pair_inner = pair.into_inner();
         for sub_pair in pair_inner {
             match sub_pair.as_rule() {
+                Rule::l_brace => {
+                    let token = KvToken {
+                        text: "{".to_string(),
+                        range: self.range_collector.span_to_range(sub_pair.as_span()),
+                    };
+                    self.tokens.push(TokenKind::LBrace(token));
+                }
+                Rule::r_brace => {
+                    let token = KvToken {
+                        text: "}".to_string(),
+                        range: self.range_collector.span_to_range(sub_pair.as_span()),
+                    };
+                    self.tokens.push(TokenKind::RBrace(token));
+                }
                 Rule::keyvalue => self.collect_keyvalue(sub_pair),
                 Rule::COMMENT => self.collect_comment(sub_pair),
                 _ => eprintln!(
@@ -134,6 +147,5 @@ impl Emitter {
                 ),
             }
         }
-        self.tokens.push(TokenKind::RBrace);
     }
 }

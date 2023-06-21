@@ -1,6 +1,6 @@
 [package]
 name = "valve_kv_tools"
-version = "0.1.0"
+version = "0.2.0"
 edition = "2021"
 description = "Lossless Valve KeyValue parser, serializer and formatter"
 documentation = "https://docs.rs/valve_kv_tools"
