@@ -39,7 +39,6 @@ jobs:
           mv valve_kv_tools.d.ts pkg/
       - run: |
           cd pkg
-          npm ci
           npm publish --dry-run
           cd ..
         env:
