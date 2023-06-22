@@ -1,5 +1,10 @@
 import { useState, useRef } from "react";
-import { FormatterConfig, lintKeyvalue } from "valve_kv_tools";
+import {
+  FormatterConfig,
+  KvErrorKind,
+  Range,
+  lintKeyvalue,
+} from "valve_kv_tools";
 import Editor, { OnMount, OnChange } from "@monaco-editor/react";
 import * as Monaco from "monaco-editor";
 
@@ -29,15 +34,36 @@ function App() {
     }
     setCode(value);
     const lintResults = lintKeyvalue(value);
-    const errorMarkers: Monaco.editor.IMarkerData[] = lintResults.map((e) => {
-      return {
-        startLineNumber: e.range.start.line,
-        startColumn: e.range.start.character,
-        endLineNumber: e.range.end.line,
-        endColumn: e.range.end.character,
+    let errorMarkers: Monaco.editor.IMarkerData[] = [];
+    lintResults.forEach((e) => {
+      let severity;
+      switch (e.kind) {
+        case KvErrorKind.SyntaxError:
+          severity = Monaco.MarkerSeverity.Error;
+          break;
+        case KvErrorKind.DuplicateError:
+          severity = Monaco.MarkerSeverity.Warning;
+      }
+      errorMarkers.push({
+        startLineNumber: e.range.start.line + 1,
+        startColumn: e.range.start.character + 1,
+        endLineNumber: e.range.end.line + 1,
+        endColumn: e.range.end.character + 1,
         message: e.message,
-        severity: Monaco.MarkerSeverity.Error,
-      };
+        severity,
+      });
+      if (e.kind === KvErrorKind.DuplicateError) {
+        e.additionalRanges.forEach((dup: Range) =>
+          errorMarkers.push({
+            startLineNumber: dup.start.line + 1,
+            startColumn: dup.start.character + 1,
+            endLineNumber: dup.end.line + 1,
+            endColumn: dup.end.character + 1,
+            message: e.message,
+            severity: Monaco.MarkerSeverity.Hint,
+          })
+        );
+      }
     });
     editorRef.current?.setModelMarkers(modelRef.current, "error", errorMarkers);
   };

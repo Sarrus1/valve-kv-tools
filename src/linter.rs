@@ -4,16 +4,26 @@ use pest::error::LineColLocation;
 
 #[cfg(target_arch = "wasm32")]
 use js_sys::Array;
+use wasm_bindgen::prelude::wasm_bindgen;
 #[cfg(target_arch = "wasm32")]
-use wasm_bindgen::{prelude::wasm_bindgen, JsValue};
+use wasm_bindgen::JsValue;
 
 use crate::{KeyValue, Position, Range, Value};
+
+#[wasm_bindgen]
+#[derive(Default, Debug, Clone, Copy, PartialEq, Eq)]
+pub enum KvErrorKind {
+    #[default]
+    SyntaxError,
+    DuplicateError,
+}
 
 #[derive(Default, Debug, Clone, PartialEq, Eq)]
 pub struct KvError {
     range: Range,
     additional_ranges: Vec<Range>,
     message: String,
+    kind: KvErrorKind,
 }
 
 #[cfg(target_arch = "wasm32")]
@@ -28,6 +38,7 @@ impl KvError {
                 .map(JsValue::from)
                 .collect(),
             message: self.message.clone(),
+            kind: self.kind,
         }
     }
 }
@@ -49,6 +60,10 @@ pub struct KvErrorJs {
     /// Error message of the error
     #[wasm_bindgen(readonly)]
     pub message: String,
+
+    /// Kind of the error
+    #[wasm_bindgen(readonly)]
+    pub kind: KvErrorKind,
 }
 
 #[cfg(target_arch = "wasm32")]
@@ -91,6 +106,7 @@ pub fn lint_keyvalue(input: &str) -> Vec<KvError> {
                 range,
                 additional_ranges: vec![],
                 message: err.variant.message().to_string(),
+                kind: KvErrorKind::SyntaxError,
             });
         }
         Ok(kv) => {
@@ -101,6 +117,7 @@ pub fn lint_keyvalue(input: &str) -> Vec<KvError> {
                     range: dup.original_declaration,
                     additional_ranges: dup.duplicate_declarations,
                     message: format!("Duplicate entry for key \"{}\"", dup.key),
+                    kind: KvErrorKind::DuplicateError,
                 });
             }
         }
