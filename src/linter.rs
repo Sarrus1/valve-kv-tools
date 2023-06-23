@@ -18,12 +18,21 @@ pub enum KvErrorKind {
     DuplicateError,
 }
 
+/// Representation of a KeyValue linter error
 #[derive(Default, Debug, Clone, PartialEq, Eq)]
 pub struct KvError {
-    range: Range,
-    additional_ranges: Vec<Range>,
-    message: String,
-    kind: KvErrorKind,
+    /// Range of the error
+    pub range: Range,
+
+    /// Ranges that are related to the error
+    /// For example, the range of duplicate entries in a duplicate error
+    pub additional_ranges: Vec<Range>,
+
+    /// Error message of the error
+    pub message: String,
+
+    /// Kind of the error
+    pub kind: KvErrorKind,
 }
 
 #[cfg(target_arch = "wasm32")]
@@ -153,7 +162,14 @@ fn search_for_duplicates(dups: &mut Vec<Duplicate>, keyvalues: &[KeyValue]) {
                     keys.insert(kv.key.clone(), Duplicate::new(kv));
                 }
             }
-            Value::Section(section_val) => search_for_duplicates(dups, section_val),
+            Value::Section(section_val) => {
+                if let Some(dup) = keys.get_mut(&kv.key) {
+                    dup.duplicate_declarations.push(kv.key_range);
+                } else {
+                    keys.insert(kv.key.clone(), Duplicate::new(kv));
+                }
+                search_for_duplicates(dups, section_val)
+            }
         }
     }
     dups.extend(keys.into_iter().filter_map(|(_, dup)| {
