@@ -44,7 +44,7 @@ fn linter_keyvalue_section_duplicate() {
                     line: 3,
                     character: 9,
                 },
-            }],
+            },],
             message: "Duplicate entry for key \"key\"".to_string(),
             kind: KvErrorKind::DuplicateError,
         }]
@@ -133,8 +133,48 @@ fn linter_keyvalue_section_duplicate_3() {
 }
 
 #[test]
-fn linter_syntax_error() {
+fn linter_syntax_error_1() {
     let input = r#""key"
 {"#;
-    assert!(!lint_keyvalue(input).is_empty(),);
+    assert_eq!(
+        lint_keyvalue(input),
+        [KvError {
+            range: Range {
+                start: Position {
+                    line: 2,
+                    character: 2
+                },
+                end: Position {
+                    line: 2,
+                    character: 2
+                }
+            },
+            additional_ranges: vec![],
+            message: "expected COMMENT, r_brace, or string".to_string(),
+            kind: KvErrorKind::SyntaxError
+        }]
+    )
+}
+
+#[test]
+fn linter_syntax_error_2() {
+    let input = r#""key" "val"#;
+    assert_eq!(
+        lint_keyvalue(input),
+        [KvError {
+            range: Range {
+                start: Position {
+                    line: 1,
+                    character: 7
+                },
+                end: Position {
+                    line: 1,
+                    character: 7
+                }
+            },
+            additional_ranges: vec![],
+            message: "expected COMMENT, l_brace, or string".to_string(),
+            kind: KvErrorKind::SyntaxError
+        }]
+    )
 }

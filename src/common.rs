@@ -43,3 +43,12 @@ impl Range {
         Range { start, end }
     }
 }
+
+#[test]
+fn test_range() {
+    let range = Range::new(Position::new(1, 2), Position::new(3, 4));
+    assert_eq!(range.start.line, 1);
+    assert_eq!(range.start.character, 2);
+    assert_eq!(range.end.line, 3);
+    assert_eq!(range.end.character, 4);
+}
