@@ -34,7 +34,7 @@ jobs:
           node-version: "16.x"
           registry-url: "https://registry.npmjs.org"
       - name: Build wasm
-        run: wasm-pack build --release
+        run: wasm-pack build --target nodejs --release
       - run: |
           cd pkg
           npm publish
