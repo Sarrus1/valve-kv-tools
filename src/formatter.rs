@@ -48,10 +48,16 @@ impl Default for FormatterConfig {
 
 #[test]
 fn test_formatter_config() {
-    let config = FormatterConfig::default();
+    let mut config = FormatterConfig::default();
     assert!(!config.use_tabs);
+    config.use_tabs = true;
+    assert!(config.use_tabs);
     assert_eq!(config.indent_size, 4);
+    config.indent_size = 2;
+    assert_eq!(config.indent_size, 2);
     assert_eq!(config.max_empty_lines, 1);
+    config.max_empty_lines = 2;
+    assert_eq!(config.max_empty_lines, 2);
 }
 
 #[cfg(target_arch = "wasm32")]

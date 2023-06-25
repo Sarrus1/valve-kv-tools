@@ -35,6 +35,51 @@ pub struct KvError {
     pub kind: KvErrorKind,
 }
 
+#[test]
+fn test_kv_error() {
+    let mut kv_error = KvError::default();
+    assert_eq!(kv_error.range.start.line, 0);
+    assert_eq!(kv_error.range.start.character, 0);
+    assert_eq!(kv_error.range.end.line, 0);
+    assert_eq!(kv_error.range.end.character, 0);
+    kv_error.range = Range {
+        start: Position {
+            line: 1,
+            character: 2,
+        },
+        end: Position {
+            line: 3,
+            character: 4,
+        },
+    };
+    assert_eq!(kv_error.range.start.line, 1);
+    assert_eq!(kv_error.range.start.character, 2);
+    assert_eq!(kv_error.range.end.line, 3);
+    assert_eq!(kv_error.range.end.character, 4);
+    assert_eq!(kv_error.additional_ranges.len(), 0);
+    kv_error.additional_ranges.push(Range {
+        start: Position {
+            line: 5,
+            character: 6,
+        },
+        end: Position {
+            line: 7,
+            character: 8,
+        },
+    });
+    assert_eq!(kv_error.additional_ranges.len(), 1);
+    assert_eq!(kv_error.additional_ranges[0].start.line, 5);
+    assert_eq!(kv_error.additional_ranges[0].start.character, 6);
+    assert_eq!(kv_error.additional_ranges[0].end.line, 7);
+    assert_eq!(kv_error.additional_ranges[0].end.character, 8);
+    assert_eq!(kv_error.message, "");
+    kv_error.message = "test".to_string();
+    assert_eq!(kv_error.message, "test");
+    assert_eq!(kv_error.kind, KvErrorKind::SyntaxError);
+    kv_error.kind = KvErrorKind::DuplicateError;
+    assert_eq!(kv_error.kind, KvErrorKind::DuplicateError);
+}
+
 #[cfg(target_arch = "wasm32")]
 impl KvError {
     pub(crate) fn to_js(&self) -> KvErrorJs {
